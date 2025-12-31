@@ -38,21 +38,12 @@ public class Cell {
     }
 
     public void click() {
-        switch (this.state) {
-            case HIDDEN:
-                if (bomb) {
-                    this.setState(CellState.BOMB);
-                } else {
-                    this.setState(CellState.REVEALED);
-                }
-                break;
-
-            case FLAGGED:
-                this.setState(CellState.HIDDEN);
-                break;
-
-            default:
-                break;
+        if (this.state == CellState.HIDDEN) {
+            if (bomb) {
+                this.setState(CellState.BOMB);
+            } else {
+                this.setState(CellState.REVEALED);
+            }
         }
     }
 
@@ -61,13 +52,30 @@ public class Cell {
         else if(this.state == CellState.FLAGGED) this.state = CellState.HIDDEN;
     }
 
-    public void print() {
+    public void reveal() {
         switch (this.state) {
-            case HIDDEN -> System.out.print(" -");
-            case REVEALED -> System.out.print(this.nearbyBombs > 0 ? (" " + this.nearbyBombs) : " .");
-            case BOMB -> System.out.print(" B");
-            case FLAGGED -> System.out.print(" f");
+            case HIDDEN, FLAGGED -> {
+                if (bomb) {
+                    this.setState(CellState.BOMB);
+                } else {
+                    this.setState(CellState.REVEALED);
+                }
+            }
+
+            default -> {}
         }
     }
+
+    public void print(int cellWidth) {
+        String s = switch (state) {
+            case HIDDEN   -> "-";
+            case BOMB     -> "B";
+            case FLAGGED  -> "f";
+            case REVEALED -> (nearbyBombs > 0 ? String.valueOf(nearbyBombs) : ".");
+        };
+
+        System.out.printf("%" + cellWidth + "s ", s);
+    }
+
 
 }

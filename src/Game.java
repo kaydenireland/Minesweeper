@@ -1,10 +1,8 @@
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Game {
     private final int width;
     private final int height;
-    private final int area;
     private final int bombs;
     private final Cell[][] board;
     private boolean gameLoop;
@@ -13,7 +11,6 @@ public class Game {
     public Game(int width, int height, int bombs) {
         this.width = width;
         this.height = height;
-        this.area = width * height;
         this.bombs = bombs;
         this.board = initializeBoard();
         this.analyzeNeighbors();
@@ -23,48 +20,50 @@ public class Game {
 
     private Cell[][] initializeBoard() {
         Random rng = new Random();
-        final int bombChance = Math.max((this.area / bombs), 1);
         Cell[][] temp = new Cell[width][height];
 
-        for(int h = 0; h < height; h++) {
-            for(int w = 0; w < width; w++) {
-                temp[w][h] = new Cell(rng.nextInt(bombChance) == 0);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                temp[x][y] = new Cell(false);
             }
+        }
+
+        List<int[]> positions = new ArrayList<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                positions.add(new int[]{x, y});
+            }
+        }
+
+        Collections.shuffle(positions, rng);
+
+        for (int i = 0; i < bombs; i++) {
+            int[] p = positions.get(i);
+            temp[p[0]][p[1]] = new Cell(true);
         }
 
         return temp;
     }
 
+
     private void analyzeNeighbors() {
-        for(int h = 0; h < height; h++) {
-            for (int w = 0; w < width; w++) {
+        for(int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
 
-                if (board[w][h].isBomb()) continue;
+                if (board[x][y].isBomb()) continue;
 
-                // Above
-                if (h - 1 >= 0) {
-                    // Left
-                    if (w - 1 >= 0 && board[w - 1][h - 1].isBomb()) board[w][h].addNearbyBomb();
-                    // Center
-                    if (board[w][h - 1].isBomb()) board[w][h].addNearbyBomb();
-                    // Right
-                    if (w + 1 < board.length && board[w + 1][h - 1].isBomb()) board[w][h].addNearbyBomb();
-                }
-                // Below
-                if (h + 1 < board[0].length) {
-                    // Left
-                    if (w - 1 >= 0 && board[w - 1][h + 1].isBomb()) board[w][h].addNearbyBomb();
-                    // Center
-                    if (board[w][h + 1].isBomb()) board[w][h].addNearbyBomb();
-                    // Right
-                    if (w + 1 < board.length && board[w + 1][h + 1].isBomb())board[w][h].addNearbyBomb();
-                }
-                // Sides
-                {
-                    // Left
-                    if (w - 1 >= 0 && board[w - 1][h].isBomb()) board[w][h].addNearbyBomb();
-                    // Right
-                    if (w + 1 < board.length && board[w + 1][h].isBomb()) board[w][h].addNearbyBomb();
+                for (int dy = -1; dy <= 1; dy++) {
+                    for (int dx = -1; dx <= 1; dx++) {
+                        if (dx == 0 && dy == 0) continue;
+
+                        int nx = x + dx;
+                        int ny = y + dy;
+
+                        if (nx >= 0 && nx < width && ny >= 0 && ny < height
+                                && board[nx][ny].isBomb()) {
+                            board[x][y].addNearbyBomb();
+                        }
+                    }
                 }
 
             }
@@ -72,24 +71,36 @@ public class Game {
     }
 
     public void print() {
-        System.out.print(".");
-        for(int w = 0; w < width; w++) {
-            System.out.print(" " + (w + 1));
-        }
-        for(int h = 0; h < height; h++) {
-            System.out.print("\n" + (h + 1));
-            for(int w = 0; w < width; w++) {
-                this.board[w][h].print();
-            }
+        int rowDigits = String.valueOf(height).length();
+        int colDigits = String.valueOf(width).length();
+        int cellWidth = Math.max(rowDigits, colDigits);
+
+        System.out.print(" ".repeat(cellWidth + 1));
+
+        // Column Label
+        for (int x = 1; x <= width; x++) {
+            System.out.printf("%" + cellWidth + "d ", x);
         }
         System.out.println();
+
+        // Rows
+        for (int y = 1; y <= height; y++) {
+            // Row Label
+            System.out.printf("%" + cellWidth + "d ", y);
+
+            // Cells
+            for (int x = 1; x <= width; x++) {
+                board[x - 1][y - 1].print(cellWidth);
+            }
+            System.out.println();
+        }
     }
+
 
     public void revealAll() {
         for(int h = 0; h < height; h++) {
             for(int w = 0; w < width; w++) {
-                this.board[w][h].click();
-                this.board[w][h].click();
+                this.board[w][h].reveal();
             }
         }
     }
@@ -97,7 +108,7 @@ public class Game {
 
     public void play() {
         Scanner input = new Scanner(System.in);
-        String command = "";
+        String command;
 
         // First Turn
         // Not Implemented
@@ -132,33 +143,33 @@ public class Game {
                 int y = Integer.parseInt(args[0]) - 1;
                 int x = Integer.parseInt(args[1]) - 1;
 
-                try {
-                    board[x][y].click();
-                    if (board[x][y].isBomb()) this.gameLoop = false;
-                } catch (ArrayIndexOutOfBoundsException e) {
+                if (x < 0 || x >= width || y < 0 || y >= height) {
                     System.out.println("Invalid Coordinates");
+                    return;
                 }
+
+                board[x][y].click();
+                if (board[x][y].isBomb()) this.gameLoop = false;
             } catch (NumberFormatException e) {
                 System.out.println("Both args for click must be ints");
-                System.exit(0);
             }
         } else if (args.length == 3) {
             try {
                 int y = Integer.parseInt(args[1]) - 1;
                 int x = Integer.parseInt(args[2]) - 1;
-                try {
-                    if (args[0].equalsIgnoreCase("f") || args[0].equalsIgnoreCase("flag")) {
-                        board[x][y].flag();
-                    } else if (args[0].equalsIgnoreCase("c") || args[0].equalsIgnoreCase("click")) {
-                        board[x][y].click();
-                        if (board[x][y].isBomb()) this.gameLoop = false;
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
+                if (x < 0 || x >= width || y < 0 || y >= height) {
                     System.out.println("Invalid Coordinates");
+                    return;
+                }
+
+                if (args[0].equalsIgnoreCase("f") || args[0].equalsIgnoreCase("flag")) {
+                    board[x][y].flag();
+                } else if (args[0].equalsIgnoreCase("c") || args[0].equalsIgnoreCase("click")) {
+                    board[x][y].click();
+                    if (board[x][y].isBomb()) this.gameLoop = false;
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Both args for click must be ints");
-                System.exit(0);
             }
         } else {
             System.out.println("Invalid Command");

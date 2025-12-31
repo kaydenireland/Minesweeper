@@ -1,5 +1,3 @@
-import java.util.Scanner;
-
 public class Minesweeper {
     public static void main(String[] args) {
         GameConfig config = new GameConfig(args);
