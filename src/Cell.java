@@ -8,7 +8,7 @@ enum CellState {
 public class Cell {
 
     private CellState state;
-    private final boolean bomb;
+    private boolean bomb;
     private int nearbyBombs;
 
     public Cell(boolean bomb) {
@@ -23,6 +23,10 @@ public class Cell {
 
     protected boolean isBomb() {
         return bomb;
+    }
+
+    protected void setBomb(boolean set) {
+        this.bomb = set;
     }
 
     protected boolean isFlagged() {
@@ -41,6 +45,11 @@ public class Cell {
         return this.nearbyBombs;
     }
 
+    protected void resetNearbyBombs() {
+        this.nearbyBombs = 0;
+    }
+
+    @Deprecated
     public void click() {
         if (this.state == CellState.HIDDEN) {
             if (bomb) {

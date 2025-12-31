@@ -7,6 +7,7 @@ public class Game {
     private final Cell[][] board;
     private boolean gameLoop;
     private boolean winCondition;
+    private boolean firstTurn;
 
     public Game(int width, int height, int bombs) {
         this.width = width;
@@ -16,8 +17,10 @@ public class Game {
         this.analyzeNeighbors();
         this.gameLoop = true;
         this.winCondition = false;
+        this.firstTurn = true;
     }
 
+    // TODO: Initialize After First Click
     private Cell[][] initializeBoard() {
         Random rng = new Random();
         Cell[][] temp = new Cell[width][height];
@@ -49,6 +52,9 @@ public class Game {
     private void analyzeNeighbors() {
         for(int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+
+                // Reset Count
+                board[x][y].resetNearbyBombs();
 
                 if (board[x][y].isBomb()) continue;
 
@@ -111,8 +117,12 @@ public class Game {
         String command;
 
         // First Turn
-        // Not Implemented
-        // Move mine if hit on first turn
+        this.print();
+        System.out.print("\nEnter Command or 'help' for Command List: ");   // Move to first turn later
+        command = input.nextLine();
+        this.parseCommand(command);
+        this.checkWinCondition();
+        this.firstTurn = false;
 
         // Rest of Game
         while (gameLoop && !winCondition) {
@@ -136,6 +146,29 @@ public class Game {
     private void click(int x, int y) {
         Cell cell = board[x][y];
 
+        if (firstTurn) {
+            List<int[]> toMove = new ArrayList<>();
+
+            for (int dy = -1; dy <= 1; dy++) {
+                for (int dx = -1; dx <= 1; dx++) {
+                    int nx = x + dx;
+                    int ny = y + dy;
+
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height
+                            && board[nx][ny].isBomb()) {
+                        toMove.add(new int[]{nx, ny});
+                    }
+                }
+            }
+
+            for (int[] p : toMove) {
+                relocateBomb(p[0], p[1], x, y);
+            }
+
+            analyzeNeighbors();
+            firstTurn = false;
+        }
+
         if (cell.isFlagged() || cell.isRevealed()) return;
 
         if (cell.isBomb()) {
@@ -150,6 +183,34 @@ public class Game {
             cell.reveal();
         }
     }
+
+
+    // TODO: Error Checking or Prevention To Stop Infinite Loops
+    private void relocateBomb(int bx, int by, int fx, int fy) {
+        if (bombs >= width * height - 9) {
+            throw new IllegalStateException("Too many bombs to guarantee first-click safety");
+        }
+
+        Random rng = new Random();
+
+        while (true) {
+            int x = rng.nextInt(width);
+            int y = rng.nextInt(height);
+
+            // Exclude first-click safe zone
+            if (x >= fx - 1 && x <= fx + 1
+                    && y >= fy - 1 && y <= fy + 1) {
+                continue;
+            }
+
+            if (!board[x][y].isBomb()) {
+                board[x][y].setBomb(true);
+                board[bx][by].setBomb(false);
+                return;
+            }
+        }
+    }
+
 
     // TODO: BFS
     private void flood(int x, int y) {
@@ -235,3 +296,4 @@ public class Game {
     }
 
 }
+// TODO: Text Coloring
