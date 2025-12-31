@@ -37,6 +37,10 @@ public class Cell {
         this.nearbyBombs++;
     }
 
+    protected int getNearbyBombs() {
+        return this.nearbyBombs;
+    }
+
     public void click() {
         if (this.state == CellState.HIDDEN) {
             if (bomb) {

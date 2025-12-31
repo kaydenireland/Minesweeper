@@ -1,5 +1,6 @@
 import java.util.Scanner;
 
+// TODO: Stronger Value Checking
 public class GameConfig {
     int width;
     int height;

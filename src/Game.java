@@ -133,6 +133,50 @@ public class Game {
 
     }
 
+    private void click(int x, int y) {
+        Cell cell = board[x][y];
+
+        if (cell.isFlagged() || cell.isRevealed()) return;
+
+        if (cell.isBomb()) {
+            cell.reveal();
+            gameLoop = false;
+            return;
+        }
+
+        if (cell.getNearbyBombs() == 0) {
+            flood(x, y);
+        } else {
+            cell.reveal();
+        }
+    }
+
+    // TODO: BFS
+    private void flood(int x, int y) {
+        // Bounds
+        if (x < 0 || x >= width || y < 0 || y >= height) return;
+
+        Cell cell = board[x][y];
+
+        // Stop conditions
+        if (cell.isRevealed() || cell.isFlagged() || cell.isBomb()) return;
+
+        // Reveal first (marks visited)
+        cell.reveal();
+
+        // Stop at numbered cells
+        if (cell.getNearbyBombs() != 0) return;
+
+        // Recurse to neighbors
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                if (dx == 0 && dy == 0) continue;
+                flood(x + dx, y + dy);
+            }
+        }
+    }
+
+
     public void parseCommand(String cmd) {
         String[] args = cmd.split(" ");
 
@@ -148,8 +192,7 @@ public class Game {
                     return;
                 }
 
-                board[x][y].click();
-                if (board[x][y].isBomb()) this.gameLoop = false;
+                this.click(x, y);
             } catch (NumberFormatException e) {
                 System.out.println("Both args for click must be ints");
             }
@@ -165,8 +208,7 @@ public class Game {
                 if (args[0].equalsIgnoreCase("f") || args[0].equalsIgnoreCase("flag")) {
                     board[x][y].flag();
                 } else if (args[0].equalsIgnoreCase("c") || args[0].equalsIgnoreCase("click")) {
-                    board[x][y].click();
-                    if (board[x][y].isBomb()) this.gameLoop = false;
+                    this.click(x, y);
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Both args for click must be ints");
