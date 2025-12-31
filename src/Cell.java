@@ -25,6 +25,14 @@ public class Cell {
         return bomb;
     }
 
+    protected boolean isFlagged() {
+        return this.state == CellState.FLAGGED;
+    }
+
+    protected boolean isRevealed() {
+        return this.state == CellState.REVEALED;
+    }
+
     protected void addNearbyBomb() {
         this.nearbyBombs++;
     }
@@ -46,6 +54,11 @@ public class Cell {
             default:
                 break;
         }
+    }
+
+    public void flag() {
+        if (this.state == CellState.HIDDEN) this.setState(CellState.FLAGGED);
+        else if(this.state == CellState.FLAGGED) this.state = CellState.HIDDEN;
     }
 
     public void print() {

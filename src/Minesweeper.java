@@ -5,8 +5,7 @@ public class Minesweeper {
         GameConfig config = new GameConfig(args);
 
         Game game = new Game(config.width, config.height, config.bombCount);
-        game.revealAll();
-        game.print();
+        game.play();
     }
 }
 
