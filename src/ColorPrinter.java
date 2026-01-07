@@ -20,7 +20,7 @@ enum TextColor {
     int bg() { return bg; }
 }
 
-
+@SuppressWarnings("unused")
 enum TextStyle {
     BOLD(1),
     DIM(2),
@@ -39,6 +39,7 @@ enum TextStyle {
 }
 
 
+@SuppressWarnings("all")
 public final class ColorPrinter {
 
     private static final String ESC = "\u001B[";

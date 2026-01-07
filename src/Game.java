@@ -79,13 +79,13 @@ public class Game {
     public void print() {
         int rowDigits = String.valueOf(height).length();
         int colDigits = String.valueOf(width).length();
-        int cellWidth = Math.max(rowDigits, colDigits) + 2;
+        int cellWidth = Math.max(rowDigits, colDigits);
 
-        ColorPrinter.print(" ".repeat(cellWidth + 1), null, TextColor.BLACK);
+        ColorPrinter.print(" ".repeat(rowDigits + 2), null, TextColor.BLACK);
 
         // Column Label
         for (int x = 1; x <= width; x++) {
-            String xx = ColorPrinter.format(String.valueOf(x) + " ", null, TextColor.BLACK, TextStyle.BOLD);
+            String xx = ColorPrinter.format(x + " ", null, TextColor.BLACK, TextStyle.BOLD);
             System.out.printf("%" + cellWidth + "s", xx);
         }
         System.out.println();
@@ -93,7 +93,8 @@ public class Game {
         // Rows
         for (int y = 1; y <= height; y++) {
             // Row Label
-            String yy = ColorPrinter.format(" " + String.valueOf(y) + " ", null, TextColor.BLACK, TextStyle.BOLD);
+            int extra = rowDigits - String.valueOf(y).length();
+            String yy = ColorPrinter.format(" " + y + " ".repeat(extra), null, TextColor.BLACK, TextStyle.BOLD);
             System.out.printf("%" + cellWidth + "s ", yy);
 
             // Cells
