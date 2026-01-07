@@ -79,20 +79,22 @@ public class Game {
     public void print() {
         int rowDigits = String.valueOf(height).length();
         int colDigits = String.valueOf(width).length();
-        int cellWidth = Math.max(rowDigits, colDigits);
+        int cellWidth = Math.max(rowDigits, colDigits) + 2;
 
-        System.out.print(" ".repeat(cellWidth + 1));
+        ColorPrinter.print(" ".repeat(cellWidth + 1), null, TextColor.BLACK);
 
         // Column Label
         for (int x = 1; x <= width; x++) {
-            System.out.printf("%" + cellWidth + "d ", x);
+            String xx = ColorPrinter.format(String.valueOf(x) + " ", null, TextColor.BLACK, TextStyle.BOLD);
+            System.out.printf("%" + cellWidth + "s", xx);
         }
         System.out.println();
 
         // Rows
         for (int y = 1; y <= height; y++) {
             // Row Label
-            System.out.printf("%" + cellWidth + "d ", y);
+            String yy = ColorPrinter.format(" " + String.valueOf(y) + " ", null, TextColor.BLACK, TextStyle.BOLD);
+            System.out.printf("%" + cellWidth + "s ", yy);
 
             // Cells
             for (int x = 1; x <= width; x++) {
@@ -116,9 +118,11 @@ public class Game {
         Scanner input = new Scanner(System.in);
         String command;
 
+        System.out.println();
+
         // First Turn
         this.print();
-        System.out.print("\nEnter Command or 'help' for Command List: ");   // Move to first turn later
+        System.out.print("\nEnter Command or 'help' for Command List: ");
         command = input.nextLine();
         this.parseCommand(command);
         this.checkWinCondition();
@@ -127,7 +131,7 @@ public class Game {
         // Rest of Game
         while (gameLoop && !winCondition) {
             this.print();
-            System.out.print("\nEnter Command or 'help' for Command List: ");   // Move to first turn later
+            System.out.print("\nEnter Command or 'help' for Command List: ");
             command = input.nextLine();
             this.parseCommand(command);
             this.checkWinCondition();
@@ -296,4 +300,3 @@ public class Game {
     }
 
 }
-// TODO: Text Coloring
